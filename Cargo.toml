@@ -1,0 +1,18 @@
+[package]
+name = "yarube"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Yarubeshitara! (やるべしたら) - Ultra-lightweight CLI Todo & Reflection notebook"
+
+[[bin]]
+name = "yarube"
+path = "src/main.rs"
+
+[dependencies]
+
+[profile.dev]
+debug = false
+
+[profile.test]
+debug = false
