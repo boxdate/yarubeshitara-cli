@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yarube (Yarubeshitara) — ターミナルで完結するプレーンテキストの手帳記録</title>
+  <meta name="description" content="Yarubeshitara (yarube) は、日々の「やることリスト」と「ふりかえり」を1日1ファイルのMarkdownに記録・棚卸しするRust製CLIバレットジャーナルツールです。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="brand">
+        <span class="brand-cmd">yarube</span>
+        <span class="brand-meta">Yarubeshitara — CLI デイリー手帳</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#philosophy">由来と思想</a>
+        <a href="#workflow">使い方</a>
+        <a href="#themes">テーマ</a>
+        <a href="#commands">コマンド一覧</a>
+        <a href="#install">インストール</a>
+        <div class="lang-switch" aria-label="Language switcher">
+          <a href="index.html" class="active" aria-current="page">JA</a>
+          <a href="en.html" lang="en">EN</a>
+        </div>
+        <a href="https://github.com/boxdate/yarubeshitara-cli" class="nav-repo-link" target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <!-- Left Column: Overview & Quick Install -->
+      <div>
+        <div class="hero-eyebrow">CLI Daily Bullet Journal</div>
+        <h1 class="hero-title">ターミナルで完結する、<br>プレーンテキストの手帳記録。</h1>
+        <p class="hero-lead">
+          <code>Yarubeshitara</code>（<code>yarube</code>）は、日々の「やることリスト」と「ふりかえり」を1日1ファイルのMarkdown（<code>~/.yarube/YYYY-MM-DD.md</code>）に素早く書き留め、1日の終わりに棚卸しするためのCLIツールです。
+        </p>
+
+        <div class="trait-tags">
+          <span class="trait-tag">1日1ファイル Markdown</span>
+          <span class="trait-tag">クォート省略で即追記</span>
+          <span class="trait-tag">1キーで翌日へタスク引き継ぎ</span>
+          <span class="trait-tag">外部クレート依存ゼロ (Rust)</span>
+        </div>
+
+        <div class="quick-cmd-bar">
+          <div class="quick-cmd-text" id="hero-quick-cmd" data-copy="git clone https://github.com/boxdate/yarubeshitara-cli.git && cd yarubeshitara-cli && cargo build --release">
+            <span class="prompt">$</span>git clone https://github.com/boxdate/yarubeshitara-cli.git &amp;&amp; cd yarubeshitara-cli &amp;&amp; cargo build --release
+          </div>
+          <button type="button" class="btn-copy" onclick="copyCode('hero-quick-cmd', this)">Copy</button>
+        </div>
+
+        <div class="hero-links">
+          <a href="#install">→ インストール手順</a>
+          <a href="#commands">→ コマンド一覧</a>
+          <a href="https://github.com/boxdate/yarubeshitara-cli" target="_blank" rel="noopener noreferrer">→ GitHub リポジトリ</a>
+        </div>
+      </div>
+
+      <!-- Right Column: Terminal Output -->
+      <div class="terminal-window" aria-label="Terminal execution preview">
+        <div class="terminal-bar">
+          <div class="window-dots" aria-hidden="true">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <div class="terminal-title">yarube — ~/.yarube/2026-10-17.md</div>
+          <div style="width: 38px;"></div>
+        </div>
+        <div class="terminal-body theme-sepia">
+<div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">yarube MCP用の変換ツール作成する</span></div>
+<div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">yarube sub "PDF -> Markdown化"</span></div>
+<div class="t-line p-div">──────────────────────────────────────────────────</div>
+<div class="t-line p-date">### 10/17(火)</div>
+<div class="t-line"> </div>
+<div class="t-line p-sec">#### △ やることリスト</div>
+<div class="t-line p-done">O SIT-1-1-1-001のテスト作る</div>
+<div class="t-line p-migr">&gt; PodmanにGitbucketを立ち上げる</div>
+<div class="t-line p-sub">  - Lubuntu -&gt; Xubuntuが良いか</div>
+<div class="t-line"><span class="p-todo">• MCP用の変換ツール作成する</span></div>
+<div class="t-line"><span class="p-sub">  - PDF -&gt; Markdown化</span> <span class="p-new">[NEW]</span></div>
+<div class="t-line"> </div>
+<div class="t-line p-sec">#### △ ふりかえり</div>
+<div class="t-line p-refl">EndeavourOSにしたあき！</div>
+<div class="t-line p-refl">UXって大事。サクサク動き、Win11より軽いから使い勝手向上した。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: Naming & Portability Philosophy -->
+  <section class="section" id="philosophy">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Origin &amp; Portability</span>
+        <h2 class="section-title">北海道弁「やるべしたら」の由来と、手書き手帳のポータビリティ</h2>
+        <p class="section-subtitle">思考を止めないコマンド入力と、どの環境でもそのまま読めるプレーンテキスト設計。</p>
+      </div>
+
+      <div class="philosophy-layout">
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">Naming Origin</div>
+            <h3>「やるべしたら！」（よし、やろう！）</h3>
+            <p>
+              ツール名の <code>Yarubeshitara</code>（コマンド名: <code>yarube</code>）は、北海道弁で<strong>「よし、やろう！」「じゃあ、やろうか！」</strong>を意味する、温かく勢いのある言葉から名付けました。
+            </p>
+            <p>
+              作業中に思いついたタスクを書き留めるとき、ブラウザを開いたりクォート記号（<code>""</code>）で囲んだりする手間すら省けるよう、<code>yarube 明日の 会議 資料作成</code> と打ち込むだけで即座に手帳へ追記されます。
+            </p>
+          </div>
+          <div class="raw-md-box"><span class="t-comment"># クォートもサブコマンドも省略してそのまま追記</span>
+$ yarube 明日の 会議 資料作成
+
+<span class="t-comment"># 直前のタスクに補足メモ（インデント）を紐づける</span>
+$ yarube sub "プロジェクターの変換アダプタ確認"</div>
+        </div>
+
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">Plaintext Notebook</div>
+            <h3>手書き手帳のように持ち運べる標準Markdown</h3>
+            <p>
+              記録は専用データベースを使わず、すべてローカルの <code>~/.yarube/YYYY-MM-DD.md</code> にプレーンなMarkdownとして保存されます。Gitでの管理やクラウド同期、普段使っているエディタでの直接閲覧・編集がそのまま行えます。
+            </p>
+            <p>
+              また、特殊なフォント（Nerd Fonts等）や絵文字を使わず、どの端末でも文字化けしない標準記号（<code>•</code>, <code>O</code>, <code>&gt;</code>, <code>~</code>, <code>-</code>, <code>△</code>）のみで手書き手帳の記号体系を表現しています。
+            </p>
+          </div>
+          <div>
+            <div class="raw-md-header">
+              <span>~/.yarube/2026-10-17.md</span>
+              <span>Plain Markdown</span>
+            </div>
+            <div class="raw-md-box" style="margin-top: 0;">### 10/17(火)
+
+#### △ やることリスト
+O SIT-1-1-1-001のテスト作る
+&gt; PodmanにGitbucketを立ち上げる
+  - Lubuntu -&gt; Xubuntuが良いか
+• MCP用の変換ツール作成する
+  - PDF -&gt; Markdown化
+
+#### △ ふりかえり
+EndeavourOSにしたあき！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Daily Workflow & Bullet Syntax -->
+  <section class="section" id="workflow">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Daily Workflow</span>
+        <h2 class="section-title">1日の記録・棚卸し・ふりかえり</h2>
+        <p class="section-subtitle">紙のバレットジャーナルの「タスク書き出し → 完了・翌日移行の仕分け → ふりかえり」をシンプルな3ステップで回せます。</p>
+      </div>
+
+      <div class="workflow-grid">
+        <div class="workflow-step">
+          <div class="step-num">STEP 1 / 日中の記録</div>
+          <h3>タスクと補足メモを書く</h3>
+          <p>思いついた瞬間にワンライナーで記録。直前のタスクに対するメモは <code>yarube sub</code> でインデント（<code>  - </code>）として紐づきます。</p>
+          <div class="step-cmd">$ yarube APIのレスポンス計測
+$ yarube sub "p95レイテンシを確認"</div>
+        </div>
+
+        <div class="workflow-step">
+          <div class="step-num">STEP 2 / 夕方の棚卸し</div>
+          <h3>1キーで完了・翌日へ引き継ぎ</h3>
+          <p><code>yarube review</code> で未完了タスクを1件ずつ確認。<kbd>m</kbd>（移行）を押したタスクは、補足メモごと翌日の手帳へ自動転記されます。</p>
+          <div class="step-cmd">$ yarube review
+[1/2] • APIのレスポンス計測
+  - p95レイテンシを確認
+(o:完了 / m:翌日移行 / c:取消 / s:スキップ) &gt; m</div>
+        </div>
+
+        <div class="workflow-step">
+          <div class="step-num">STEP 3 / ふりかえり・見返し</div>
+          <h3>エディタで所感を書き、過去をめくる</h3>
+          <p><code>yarube reflect</code> で愛用エディタを起動し「△ ふりかえり」を記述。過去の記録は <code>prev</code> や <code>browse</code> でパラパラ見返せます。</p>
+          <div class="step-cmd">$ yarube reflect
+$ yarube prev
+$ yarube browse</div>
+        </div>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 90px;">記号</th>
+              <th style="width: 180px;">状態</th>
+              <th style="width: 160px;">review キー操作</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="sym-token" style="color: #eceae4;">•</span></td>
+              <td><strong style="color: var(--text-bright);">未完了 (Todo)</strong></td>
+              <td><kbd>s</kbd> / <kbd>Enter</kbd> (スキップ)</td>
+              <td>新しく追加したタスク、および前日から引き継がれたタスク。</td>
+            </tr>
+            <tr>
+              <td><span class="sym-token" style="color: #6e6b63; text-decoration: line-through;">O</span></td>
+              <td><strong style="color: var(--text-bright);">完了 (Done)</strong></td>
+              <td><kbd>o</kbd></td>
+              <td>完了したタスク。表示時は薄字＋取り消し線になり、未完了タスクがひと目で分かります。</td>
+            </tr>
+            <tr>
+              <td><span class="sym-token" style="color: #d4a373;">&gt;</span></td>
+              <td><strong style="color: var(--text-bright);">翌日へ移行 (Migrated)</strong></td>
+              <td><kbd>m</kbd> または <kbd>&gt;</kbd></td>
+              <td>翌日の「△ やることリスト」へ自動転記されたタスク。サブ項目も一緒に引き継がれます。</td>
+            </tr>
+            <tr>
+              <td><span class="sym-token" style="color: #6e6b63; text-decoration: line-through;">~</span></td>
+              <td><strong style="color: var(--text-bright);">取消 (Cancelled)</strong></td>
+              <td><kbd>c</kbd> または <kbd>~</kbd></td>
+              <td>実行を取りやめたタスク（表示時は薄字＋取り消し線）。</td>
+            </tr>
+            <tr>
+              <td><span class="sym-token" style="color: #9c998f;">  - </span></td>
+              <td><strong style="color: var(--text-bright);">サブ項目 (Subtask)</strong></td>
+              <td>親タスクに連動</td>
+              <td>親タスクに紐づく補足メモ。親タスクを翌日へ移行すると一緒に引き継がれます。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: 4 Preset Color Themes (Visual Sample & Preview Only) -->
+  <section class="section" id="themes">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Color Themes</span>
+        <h2 class="section-title">4つのプリセットテーマ</h2>
+        <p class="section-subtitle">気分やターミナルの背景に合わせて <code>yarube theme &lt;name&gt;</code> でいつでも切り替えられます。</p>
+      </div>
+
+      <div class="theme-showcase-box">
+        <div class="theme-tabs" role="tablist" aria-label="Color Theme Presets">
+          <button type="button" class="theme-tab active" role="tab" aria-selected="true" data-theme="tokyo-night" onclick="selectTheme('tokyo-night')">
+            <div class="theme-tab-top">
+              <span>tokyo-night</span>
+              <div class="theme-dots" aria-hidden="true">
+                <span style="background: #7aa2f7;"></span>
+                <span style="background: #bb9af7;"></span>
+                <span style="background: #e0af68;"></span>
+                <span style="background: #9ece6a;"></span>
+              </div>
+            </div>
+            <div class="theme-tab-caption">落ち着いたダークブルー（デフォルト）</div>
+          </button>
+
+          <button type="button" class="theme-tab" role="tab" aria-selected="false" data-theme="monokai" onclick="selectTheme('monokai')">
+            <div class="theme-tab-top">
+              <span>monokai</span>
+              <div class="theme-dots" aria-hidden="true">
+                <span style="background: #66d9ef;"></span>
+                <span style="background: #fd971f;"></span>
+                <span style="background: #e6db74;"></span>
+                <span style="background: #a6e22e;"></span>
+              </div>
+            </div>
+            <div class="theme-tab-caption">鮮やかなコントラストの定番ダーク</div>
+          </button>
+
+          <button type="button" class="theme-tab" role="tab" aria-selected="false" data-theme="nord" onclick="selectTheme('nord')">
+            <div class="theme-tab-top">
+              <span>nord</span>
+              <div class="theme-dots" aria-hidden="true">
+                <span style="background: #88c0d0;"></span>
+                <span style="background: #81a1c1;"></span>
+                <span style="background: #ebcb8b;"></span>
+                <span style="background: #a3be8c;"></span>
+              </div>
+            </div>
+            <div class="theme-tab-caption">北欧風の静かなアイスブルー</div>
+          </button>
+
+          <button type="button" class="theme-tab" role="tab" aria-selected="false" data-theme="sepia" onclick="selectTheme('sepia')">
+            <div class="theme-tab-top">
+              <span>sepia</span>
+              <div class="theme-dots" aria-hidden="true">
+                <span style="background: #d4a373;"></span>
+                <span style="background: #bc6c25;"></span>
+                <span style="background: #faedcd;"></span>
+                <span style="background: #8da183;"></span>
+              </div>
+            </div>
+            <div class="theme-tab-caption">紙の手帳・クラフト紙のような温かみ</div>
+          </button>
+        </div>
+
+        <!-- Simulated Terminal Output -->
+        <div class="theme-terminal-pane theme-tokyo-night" id="theme-terminal-pane">
+<div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd" id="theme-cli-line">yarube theme tokyo-night</span></div>
+<div class="t-line p-div">──────────────────────────────────────────────────</div>
+<div class="t-line p-date">### 10/17(火)</div>
+<div class="t-line"> </div>
+<div class="t-line p-sec">#### △ やることリスト</div>
+<div class="t-line p-done">O SIT-1-1-1-001のテスト作る</div>
+<div class="t-line p-migr">&gt; PodmanにGitbucketを立ち上げる</div>
+<div class="t-line p-sub">  - Lubuntu -&gt; Xubuntuが良いか</div>
+<div class="t-line"><span class="p-todo">• MCP用の変換ツール作成する</span> <span class="p-new">[NEW]</span></div>
+<div class="t-line p-sub">  - PDF -&gt; Markdown化</div>
+<div class="t-line"> </div>
+<div class="t-line p-sec">#### △ ふりかえり</div>
+<div class="t-line p-refl">EndeavourOSにしたあき！</div>
+<div class="t-line p-refl">UXって大事。EndeavourOSでサクサク動き、使い勝手向上した。</div>
+        </div>
+
+        <div class="theme-footer-bar">
+          <span>引数なしで <code>yarube theme</code> を実行すると、ターミナル上で全4テーマの配色サンプルを一覧プレビューできます。</span>
+          <code>yarube theme &lt;name&gt;</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Command Reference -->
+  <section class="section" id="commands">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Commands</span>
+        <h2 class="section-title">コマンド一覧</h2>
+        <p class="section-subtitle">日常の記録から過去日の検索、エディタ設定までのコマンドリファレンス。</p>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 280px;">コマンド</th>
+              <th style="width: 130px;">用途</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>yarube</code></td>
+              <td>表示</td>
+              <td>今日の手帳を表示します（当日初回はテンプレートを自動作成）。</td>
+            </tr>
+            <tr>
+              <td><code>yarube [t] &lt;タスク内容...&gt;</code></td>
+              <td>タスク追加</td>
+              <td>今日の「△ やることリスト」へタスクを追記します。<code>t</code> やクォートの省略に対応しています。</td>
+            </tr>
+            <tr>
+              <td><code>yarube sub &lt;補足メモ...&gt;</code></td>
+              <td>サブ項目追加</td>
+              <td>直前のタスクに対して補足メモ（<code>  - </code>）を紐づけます。</td>
+            </tr>
+            <tr>
+              <td><code>yarube review</code></td>
+              <td>棚卸し・移行</td>
+              <td>未完了タスクを1件ずつ確認し、<kbd>o</kbd>（完了）/ <kbd>m</kbd>（翌日移行）/ <kbd>c</kbd>（取消）/ <kbd>s</kbd>（スキップ）で整理します。</td>
+            </tr>
+            <tr>
+              <td><code>yarube reflect</code></td>
+              <td>ふりかえり</td>
+              <td>エディタを起動して「△ ふりかえり」を記入します。</td>
+            </tr>
+            <tr>
+              <td><code>yarube prev [-N]</code> / <code>yarube -N</code></td>
+              <td>過去日表示</td>
+              <td>休日などの未記録日を飛ばして、直前に書いた手帳を表示します（例: <code>yarube -1</code>, <code>yarube -2</code>）。</td>
+            </tr>
+            <tr>
+              <td><code>yarube browse</code></td>
+              <td>ページめくり</td>
+              <td>記録のある日付を矢印キー（<kbd>←</kbd> / <kbd>→</kbd>）や <kbd>p</kbd> / <kbd>n</kbd> キーで前後にめくって閲覧します。</td>
+            </tr>
+            <tr>
+              <td><code>yarube search &lt;キーワード&gt;</code></td>
+              <td>全文検索</td>
+              <td>過去すべての手帳から一致するタスクやふりかえり行をハイライト抽出します。</td>
+            </tr>
+            <tr>
+              <td><code>yarube open</code></td>
+              <td>ファイル編集</td>
+              <td>今日の手帳Markdownファイル全体を設定エディタで直接開きます。</td>
+            </tr>
+            <tr>
+              <td><code>yarube theme [name]</code></td>
+              <td>テーマ変更</td>
+              <td>カラーテーマの確認・切り替え（<code>tokyo-night</code> / <code>monokai</code> / <code>nord</code> / <code>sepia</code>）。</td>
+            </tr>
+            <tr>
+              <td><code>yarube config editor [cmd]</code></td>
+              <td>エディタ設定</td>
+              <td>使用するエディタを設定します（例: <code>yarube config editor "code --wait"</code>, <code>nvim</code>, <code>vim</code>）。</td>
+            </tr>
+            <tr>
+              <td><code>yarube config lang [ja|en]</code></td>
+              <td>言語切替</td>
+              <td>表示言語とテンプレート見出しを日本語（<code>ja</code>）または英語（<code>en</code>）に切り替えます。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Installation & Quick Start -->
+  <section class="section" id="install">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Installation</span>
+        <h2 class="section-title">インストールと初期設定</h2>
+        <p class="section-subtitle">Rustツールチェーン（<code>cargo</code>）があれば、外部パッケージのダウンロードなしで約1秒でビルドできます。</p>
+      </div>
+
+      <div class="install-grid">
+        <div class="code-panel">
+          <div class="code-panel-bar">
+            <span>1. ビルドとバイナリの配置</span>
+            <button type="button" class="btn-copy" onclick="copyCode('install-build-cmd', this)">Copy</button>
+          </div>
+          <pre id="install-build-cmd" data-copy="git clone https://github.com/boxdate/yarubeshitara-cli.git
+cd yarubeshitara-cli
+cargo build --release
+cp target/release/yarube ~/.local/bin/yarube">git clone https://github.com/boxdate/yarubeshitara-cli.git
+cd yarubeshitara-cli
+cargo build --release
+
+<span class="t-comment"># PATHの通ったディレクトリへ配置</span>
+cp target/release/yarube ~/.local/bin/yarube</pre>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-panel-bar">
+            <span>2. おすすめの初期設定（エイリアス・エディタ）</span>
+            <button type="button" class="btn-copy" onclick="copyCode('install-env-cmd', this)">Copy</button>
+          </div>
+          <pre id="install-env-cmd" data-copy="alias y='yarube'
+yarube config editor &quot;nvim&quot;
+yarube theme sepia"><span class="t-comment"># ~/.bashrc や ~/.zshrc に1文字エイリアスを設定</span>
+alias y='yarube'
+
+<span class="t-comment"># ふりかえりで使うエディタとお好みのテーマを設定</span>
+yarube config editor "nvim"
+yarube theme sepia</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong style="color: var(--text-bright); font-family: var(--font-mono);">yarube (Yarubeshitara)</strong> — Released under the MIT License.
+      </div>
+      <div class="footer-links">
+        <a href="en.html" lang="en">English</a>
+        <a href="https://github.com/boxdate/yarubeshitara-cli" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/boxdate/yarubeshitara-cli/blob/main/README.ja.md" target="_blank" rel="noopener noreferrer">README (日本語)</a>
+        <a href="https://github.com/boxdate/yarubeshitara-cli/blob/main/README.md" target="_blank" rel="noopener noreferrer">README (English)</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
