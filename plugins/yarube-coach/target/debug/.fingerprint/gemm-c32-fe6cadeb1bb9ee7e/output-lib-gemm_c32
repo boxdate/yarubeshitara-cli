@@ -1,0 +1,37 @@
+error: rustc interrupted by SIGSEGV, printing backtrace
+
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x3e902ac) [0x7f4ade8902ac]
+/usr/lib/libc.so.6(+0x3e6f0) [0x7f4ada63e6f0]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d381c) [0x7f4ae01d381c]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d38bd) [0x7f4ae01d38bd]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d38e1) [0x7f4ae01d38e1]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d39ae) [0x7f4ae01d39ae]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d39ae) [0x7f4ae01d39ae]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d39ae) [0x7f4ae01d39ae]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d1a64) [0x7f4ae01d1a64]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x57d208e) [0x7f4ae01d208e]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvXs_NtCs3A0aAVe9azA_12rustc_passes19debugger_visualizerNtB4_27DebuggerVisualizerCollectorNtNtCsjhw4ci7znJr_9rustc_ast5visit7Visitor10visit_item+0x3c6) [0x7f4ae01d2bc6]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvXs_NtCs3A0aAVe9azA_12rustc_passes19debugger_visualizerNtB4_27DebuggerVisualizerCollectorNtNtCsjhw4ci7znJr_9rustc_ast5visit7Visitor10visit_item+0x4cb) [0x7f4ae01d2ccb]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvXs_NtCs3A0aAVe9azA_12rustc_passes19debugger_visualizerNtB4_27DebuggerVisualizerCollectorNtNtCsjhw4ci7znJr_9rustc_ast5visit7Visitor10visit_item+0x4cb) [0x7f4ae01d2ccb]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvXs_NtCs3A0aAVe9azA_12rustc_passes19debugger_visualizerNtB4_27DebuggerVisualizerCollectorNtNtCsjhw4ci7znJr_9rustc_ast5visit7Visitor10visit_item+0x4cb) [0x7f4ae01d2ccb]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvXs_NtCs3A0aAVe9azA_12rustc_passes19debugger_visualizerNtB4_27DebuggerVisualizerCollectorNtNtCsjhw4ci7znJr_9rustc_ast5visit7Visitor11visit_crate+0xb3) [0x7f4ae01d18cf]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvNtCs3A0aAVe9azA_12rustc_passes19debugger_visualizer20debugger_visualizers+0x8c) [0x7f4ae125e2cc]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x685e15e) [0x7f4ae125e15e]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x6513ee0) [0x7f4ae0f13ee0]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x6512327) [0x7f4ae0f12327]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(_RNvNtCsckzTn3fJ40S_15rustc_interface6passes14write_dep_info+0xd57) [0x7f4ae103dc25]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x6938ab9) [0x7f4ae1338ab9]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x68f58e4) [0x7f4ae12f58e4]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x68f56ad) [0x7f4ae12f56ad]
+/home/boxdate/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/librustc_driver-7ed0375ae352bd75.so(+0x6a0c607) [0x7f4ae140c607]
+/usr/lib/libc.so.6(+0x98042) [0x7f4ada698042]
+/usr/lib/libc.so.6(__clone+0x44) [0x7f4ada720554]
+
+note: we would appreciate a report at https://github.com/rust-lang/rust
+help: you can increase rustc's stack size by setting RUST_MIN_STACK=134217728
+note: backtrace dumped due to SIGSEGV! resuming signal

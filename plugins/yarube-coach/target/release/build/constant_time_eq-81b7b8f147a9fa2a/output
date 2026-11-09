@@ -1,0 +1,3 @@
+cargo:rustc-check-cfg=cfg(count_instructions_test)
+cargo:rustc-check-cfg=cfg(inline_asm_is_stable)
+cargo:rustc-cfg=inline_asm_is_stable
