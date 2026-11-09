@@ -667,6 +667,7 @@ kbd {
 .theme-tokyo-night .p-migr { color: #e0af68; }
 .theme-tokyo-night .p-sub  { color: #9aa5ce; }
 .theme-tokyo-night .p-refl { color: #c0caf5; }
+.theme-tokyo-night .p-coach { color: #7dcfff; }
 .theme-tokyo-night .p-new  { color: #9ece6a; font-weight: 700; }
 .theme-tokyo-night .p-div  { color: #3b4261; }
 
@@ -678,6 +679,7 @@ kbd {
 .theme-monokai .p-migr { color: #e6db74; }
 .theme-monokai .p-sub  { color: #a6e22e; }
 .theme-monokai .p-refl { color: #f8f8f2; }
+.theme-monokai .p-coach { color: #ae81ff; }
 .theme-monokai .p-new  { color: #a6e22e; font-weight: 700; }
 .theme-monokai .p-div  { color: #49483e; }
 
@@ -689,6 +691,7 @@ kbd {
 .theme-nord .p-migr { color: #ebcb8b; }
 .theme-nord .p-sub  { color: #d8dee9; }
 .theme-nord .p-refl { color: #eceff4; }
+.theme-nord .p-coach { color: #8fbcbb; }
 .theme-nord .p-new  { color: #a3be8c; font-weight: 700; }
 .theme-nord .p-div  { color: #3b4252; }
 
@@ -700,8 +703,88 @@ kbd {
 .theme-sepia .p-migr { color: #b08968; }
 .theme-sepia .p-sub  { color: #ddb892; }
 .theme-sepia .p-refl { color: #faedcd; }
+.theme-sepia .p-coach { color: #6b705c; }
 .theme-sepia .p-new  { color: #8da183; font-weight: 700; }
 .theme-sepia .p-div  { color: #5c5349; }
+
+/* Concept & Citation Notes */
+.concept-banner {
+  margin-top: 1.5rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.6rem 1.75rem;
+}
+
+.concept-banner h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.65rem;
+}
+
+.concept-banner > p {
+  font-size: 0.91rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  line-height: 1.75;
+}
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1.15rem;
+}
+
+.concept-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1.1rem 1.25rem;
+}
+
+.concept-card h4 {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.45rem;
+}
+
+.concept-card p {
+  font-size: 0.855rem;
+  color: var(--text-secondary);
+  line-height: 1.68;
+}
+
+.cite-ref {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+  margin-left: 0.15rem;
+}
+
+.footnotes-box {
+  margin-top: 1.15rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.footnotes-box a {
+  color: var(--accent-amber);
+}
+
+@media (max-width: 920px) {
+  .concept-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Section 5: Installation & Setup */
 .install-grid {

@@ -23,6 +23,7 @@
         <a href="#philosophy">由来と思想</a>
         <a href="#workflow">使い方</a>
         <a href="#themes">テーマ</a>
+        <a href="#plugins">プラグイン</a>
         <a href="#commands">コマンド一覧</a>
         <a href="#install">インストール</a>
         <div class="lang-switch" aria-label="Language switcher">
@@ -159,6 +160,34 @@ O SIT-1-1-1-001のテスト作る
 #### △ ふりかえり
 EndeavourOSにしたあき！</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Concept Banner: Why Combine TODO & Reflection on 1 Page -->
+      <div class="concept-banner" id="concept">
+        <div class="doc-panel-label">Core Concept</div>
+        <h3>なぜ「TODO」と「ふりかえり」を1ページにまとめるのか？</h3>
+        <p>
+          タスク管理ツールと日記（ジャーナリング）が別々に分かれていると、計画が崩れた日に「今日はダメだった」というネガティブな感情だけで1日を終えてしまいがちです。
+        </p>
+        <p>
+          <code>yarube</code> は、<strong>「今日やったこと（事実）」と「ふりかえり（感情・内省）」を1日の同じ1ページに並べる</strong>ことにこだわって設計されています。
+        </p>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>心の吐き出し（筆記開示）によるストレス軽減<sup class="cite-ref"><a href="#fn-1">[1]</a></sup></h4>
+            <p>焦りや疲れをそのまま <code>yarube reflect</code> で吐き出すことで、脳のワーキングメモリを圧迫しているモヤモヤを外部化し、頭をリセットします。</p>
+          </div>
+          <div class="concept-card">
+            <h4>事実と感情を並べることによるメタ認知<sup class="cite-ref"><a href="#fn-2">[2]</a></sup></h4>
+            <p>すぐ上に「今日実際に手を動かしたタスク（TODO）」が見えている状態でふりかえりを書くことで、過度な自己否定を防ぎ、客観的な視点（メタ認知）を取り戻しやすくなります。</p>
+          </div>
+        </div>
+
+        <div class="footnotes-box" aria-label="References">
+          <div id="fn-1"><strong>[1] 筆記開示（Expressive Writing）とワーキングメモリ:</strong> 不安や感情をありのまま書き出すことで反芻思考が減り、脳のワーキングメモリ空き容量が回復することが心理学研究で示されています（<a href="https://doi.org/10.1037/0096-3445.130.3.520" target="_blank" rel="noopener noreferrer">Klein &amp; Boals, 2001</a> / <a href="https://doi.org/10.1037/0021-843X.95.3.274" target="_blank" rel="noopener noreferrer">Pennebaker &amp; Beall, 1986</a>）。</div>
+          <div id="fn-2"><strong>[2] 小さな前進の可視化（The Progress Principle）:</strong> 知識労働者の日誌研究において、日々の意欲や感情を最も高める要因は「小さな前進（Small Wins）に気づけること」であると報告されています（<a href="https://hbr.org/2011/05/the-power-of-small-wins" target="_blank" rel="noopener noreferrer">Teresa Amabile &amp; Steven Kramer, 2011 — Harvard Business Review</a>）。</div>
         </div>
       </div>
     </div>
@@ -335,6 +364,74 @@ $ yarube browse</div>
           <span>引数なしで <code>yarube theme</code> を実行すると、ターミナル上で全4テーマの配色サンプルを一覧プレビューできます。</span>
           <code>yarube theme &lt;name&gt;</code>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3.5: Extensible Plugins & Local AI Coach -->
+  <section class="section" id="plugins">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Extensible Plugins</span>
+        <h2 class="section-title">プラグイン拡張とローカルAIコーチ（<code>yarube-coach</code>）</h2>
+        <p class="section-subtitle">本体の「外部クレート依存ゼロ・爆速動作」を保ったまま、プロセス隔離されたプラグインで機能を自由に拡張できます。</p>
+      </div>
+
+      <div class="philosophy-layout">
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">Official Plugin #1 — yarube-coach</div>
+            <h3>「書く瞑想」を助けるローカルAIコーチ<sup class="cite-ref"><a href="#fn-3">[3]</a></sup></h3>
+            <p>
+              <code>yarube-coach</code> は、アドバイスを押し付けるのではなく、感情を受け止めたうえで<strong>「具体的な事実や箇所」に目を向ける問いかけを1つだけ</strong>返します。誰の目も気にせず、完全オフラインの安全な環境で「書く瞑想」を深めることができます。
+            </p>
+            <p>
+              <a href="https://github.com/huggingface/candle" target="_blank" rel="noopener noreferrer">Candle</a> と <strong>Qwen3-1.7B (GGUF)</strong> により、外部ネットワーク通信やGPUに一切依存せずCPU推論のみで動作します。また、手帳への保存が常に最優先されるため、プラグイン未導入時でも記録が失われることはありません。
+            </p>
+          </div>
+          <div class="raw-md-box"><span class="t-comment"># プラグインのビルド＆初期セットアップ</span>
+$ cargo build --release --manifest-path plugins/yarube-coach/Cargo.toml
+$ cp plugins/yarube-coach/target/release/yarube-coach ~/.local/bin/
+$ yarube-coach setup
+$ yarube-coach status</div>
+        </div>
+
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">On-Reflect Hook Output</div>
+            <h3>ふりかえり直後に届く「1つの問い」</h3>
+            <p>
+              <code>yarube reflect</code> で所感を書き残すと、現在のカラーテーマに調和した配色でコーチの受容と問いかけがストリーミング表示され、当日の手帳末尾へ標準記号（<code>&gt; [Coach]</code>）で追記されます。
+            </p>
+            <p>
+              プロンプトやFew-shot例示は <code>~/.config/yarube/coach_prompt.toml</code> で自由にカスタマイズでき、今後も新しいプラグインを追加できる設計になっています。
+            </p>
+          </div>
+          <div class="terminal-window" style="margin-top: 0.5rem;">
+            <div class="terminal-bar">
+              <div class="window-dots" aria-hidden="true">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="terminal-title">yarube reflect — on_reflect hook</div>
+              <div style="width: 38px;"></div>
+            </div>
+            <div class="terminal-body theme-tokyo-night" style="font-size: 0.78rem;">
+<div class="t-line p-sec">#### △ ふりかえり</div>
+<div class="t-line p-refl">EndeavourOSにしたあき！サクサク動いて読書も快適。</div>
+<div class="t-line p-refl">ただ、仕事のテストを作る気が起きない……未確定情報しかない。</div>
+<div class="t-line p-coach">&gt; [Coach] 環境が快適になって読書や操作が楽しくなった一方、</div>
+<div class="t-line p-coach">&gt; お仕事のテストには気持ちが向かずモヤモヤしているのですね。</div>
+<div class="t-line p-coach">&gt; 質問：未確定な部分を一旦脇に置いたとき、今の時点で</div>
+<div class="t-line p-coach">&gt; 「これだけは確定している」と言える最小の箇所はどこですか？</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footnotes-box" aria-label="Plugin References">
+        <div id="fn-3"><strong>[3] 感情の言語化（Affect Labeling）と自己距離化（Self-Distancing）:</strong> モヤモヤした感情を言葉にし、一歩引いた視点から具体的な事実を見つめ直すことで、扁桃体の過剰な反応が鎮まり客観的な自己洞察（メタ認知）が深まることが示されています（<a href="https://doi.org/10.1111/j.1467-9280.2007.01916.x" target="_blank" rel="noopener noreferrer">Lieberman et al., 2007</a> / <a href="https://doi.org/10.1177/0963721411408883" target="_blank" rel="noopener noreferrer">Kross &amp; Ayduk, 2011</a>）。</div>
       </div>
     </div>
   </section>

@@ -16,6 +16,17 @@ Capture your daily **"△ Todo List"** and **"△ Reflection"** from the termina
 
 ---
 
+## Concept: Why Combine "TODO" and "Reflection" on a Single Page?
+
+When your task manager and your daily journal live in separate tools, a day where plans fall apart often ends with a single lingering feeling: *"Today was a failure."*
+
+`yarube` is purposefully designed to place **"what you actually did today (facts)"** and **"your daily reflection (emotions & introspection)" side by side on the exact same page**.
+
+- **Stress Relief via Expressive Writing (Brain Dump)**: Pouring out impatience, fatigue, or raw thoughts with `yarube reflect` externalizes mental clutter occupying your brain's working memory and resets your mind[^1].
+- **Metacognition by Pairing Facts with Feelings**: Writing your reflection while looking directly at the tasks (`TODO`) you actually moved forward right above it prevents excessive self-criticism and helps you regain an objective perspective (metacognition)[^2].
+
+---
+
 ## Key Features
 
 - **Zero-Friction Capture (< 0.1s)**
@@ -168,6 +179,77 @@ yarube config lang ja
 
 ---
 
+## Plugins (Extensible Plugin Ecosystem)
+
+`yarube` keeps its core binary ultra-fast and zero-dependency while supporting an **optional, process-isolated plugin system**.
+Plugins live in `plugins/` (or `~/.local/share/yarube/plugins` and `$PATH` as `yarube-<name>` executables) and can be written in any language (Rust, Python, Bash, etc.). Saving your daily journal always takes top priority—even if a plugin is not installed or fails, your notes are safely persisted first with zero impact on core speed.
+
+### How Plugins Work
+
+- **Subcommand Delegation (`yarube <name>`)**: Unknown subcommands automatically dispatch to `yarube-<name>` in your plugin directory or `$PATH`.
+- **Lifecycle Hooks (`on_reflect`, etc.)**: After `yarube reflect` saves your entry, registered hook plugins receive a 1-line JSON payload via `stdin` (`event`, `date`, `log_path`, `added_text`) along with theme/locale environment variables (`YARUBE_LANG`, `YARUBE_THEME_NAME`, `YARUBE_COLOR_COACH`, `YARUBE_LOG_PATH`, `YARUBE_CONFIG_PATH`).
+- **Selective Opt-In / Opt-Out**: Enable, disable, or reorder plugins anytime via `~/.config/yarube/config.toml`.
+
+### Official Plugins
+
+*(More plugins will be added to `plugins/` over time!)*
+
+| Plugin | Binary | Hook / Command | Description |
+| :--- | :--- | :--- | :--- |
+| **[`yarube-coach`](plugins/yarube-coach)** | `yarube-coach` | `on_reflect` / `yarube coach` | 100% local, offline CPU AI reflection coach powered by Qwen3-1.7B (GGUF) |
+
+---
+
+### 1. Local AI Reflection Coach (`yarube-coach`)
+
+**`yarube-coach`** is an offline, privacy-first reflection coach powered by [Candle](https://github.com/huggingface/candle) and **Qwen3-1.7B (GGUF)**.
+When you write a daily reflection (`yarube reflect`), it runs entirely on your CPU with **zero network calls and no GPU required**, streaming back empathetic acknowledgment and **one gentle question** to help separate emotions from facts and deepen your metacognition:
+
+- **A Local AI Coach for "Written Meditation" (Journaling)**: Rather than pushing unsolicited advice, `yarube-coach` first acknowledges how you feel and then asks **just one focused question** that directs your attention to concrete facts or a specific starting point. With nobody watching and 100% offline privacy, you can deepen your "written meditation" in a completely safe space[^3].
+
+```markdown
+#### △ Reflection
+Switched to EndeavourOS! Everything runs super smoothly.
+Still don't feel like writing tests for work though... only uncertain specs everywhere.
+> [Coach] It sounds like you're enjoying your comfortable new OS environment, yet feeling weighed down and hesitant about testing due to all the uncertainty.
+> Question: Setting the uncertain parts aside for a moment, what is the smallest piece that you know for sure right now?
+```
+
+#### Building & Setting Up `yarube-coach`
+
+```bash
+# Build the plugin binary (isolated from the core workspace)
+cargo build --release --manifest-path plugins/yarube-coach/Cargo.toml
+
+# Place the binary in your plugin directory or PATH (e.g. ~/.local/bin)
+cp plugins/yarube-coach/target/release/yarube-coach ~/.local/bin/
+
+# Initialize default prompt config and download the Qwen3-1.7B GGUF model & tokenizer
+yarube-coach setup
+# (Or generate config only and show manual curl commands without downloading)
+yarube-coach setup --no-download
+
+# Check installation status of model, tokenizer, and prompt configuration
+yarube-coach status
+```
+
+#### Customizing Prompts & Parameters
+
+- **Prompt Template**: Edit `~/.config/yarube/coach_prompt.toml` (auto-created by `setup`) to customize the system instruction and few-shot examples (`[[examples]]`). If the file is missing or contains invalid syntax, `yarube-coach` safely falls back to its built-in Japanese/English default prompts.
+- **Plugin Settings (`~/.config/yarube/config.toml`)**:
+  ```toml
+  [plugins.coach]
+  enabled = true
+  model_path = "~/.local/share/yarube/models/Qwen3-1.7B-Q8_0.gguf"
+  tokenizer_path = "~/.local/share/yarube/models/tokenizer.json"
+  max_tokens = 100
+  temperature = 0.3
+  top_k = 10
+  top_p = 0.8
+  ```
+
+---
+
 ## Architecture & Testing
 
 `yarube` is structured using a clean **Ports & Adapters (Layered) Architecture** for high cohesion, loose coupling, and testability:
@@ -197,3 +279,9 @@ We used **WDD (Why-Driven Development)** to structure requirements as a hierarch
 5. **EARS (Easy Approach to Requirements Syntax)**: Unambiguous system behavior rules (Event-driven, State-driven, Ubiquitous, Unwanted behavior)
 
 By evolving [Requirements.md](Requirements.md) step-by-step from `US-01` to `US-06` and aligning on the architecture before each phase, Antigravity translated all 21 Test Perspectives (`TP-01`–`TP-21`) directly into automated integration tests and a clean, zero-dependency Rust codebase.
+
+---
+
+[^1]: **Expressive Writing & Working Memory**: Psychological research demonstrates that writing down raw thoughts and emotions reduces intrusive rumination and frees up working memory capacity ([Klein & Boals (2001), *Expressive writing can increase working memory capacity*](https://doi.org/10.1037/0096-3445.130.3.520); [Pennebaker & Beall (1986)](https://doi.org/10.1037/0021-843X.95.3.274)).
+[^2]: **Visualizing Small Wins (The Progress Principle)**: Multi-year diary studies of knowledge workers show that the single most important factor boosting daily motivation and emotional well-being is recognizing incremental progress ("Small Wins") ([Teresa Amabile & Steven Kramer (2011), *The Power of Small Wins*, Harvard Business Review](https://hbr.org/2011/05/the-power-of-small-wins)). Keeping your TODOs (facts) and Reflection (feelings) on one page ensures you never lose sight of the steps you did take, even when plans change.
+[^3]: **Affect Labeling & Self-Distancing (Metacognition)**: Putting feelings into words and stepping back to observe concrete facts dampens amygdala reactivity and fosters objective self-reflection ([Lieberman et al. (2007), *Putting Feelings Into Words*](https://doi.org/10.1111/j.1467-9280.2007.01916.x); [Kross & Ayduk (2011), *Making Meaning out of Negative Experiences by Self-Distancing*](https://doi.org/10.1177/0963721411408883)).

@@ -23,6 +23,7 @@
         <a href="#philosophy">Origin &amp; Philosophy</a>
         <a href="#workflow">Workflow</a>
         <a href="#themes">Themes</a>
+        <a href="#plugins">Plugins</a>
         <a href="#commands">Commands</a>
         <a href="#install">Install</a>
         <div class="lang-switch" aria-label="Language switcher">
@@ -159,6 +160,34 @@ O Write tests for SIT-1-1-1-001
 #### △ Reflection
 Switched to EndeavourOS!</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Concept Banner: Why Combine TODO & Reflection on 1 Page -->
+      <div class="concept-banner" id="concept">
+        <div class="doc-panel-label">Core Concept</div>
+        <h3>Why Combine "TODO" and "Reflection" on a Single Page?</h3>
+        <p>
+          When your task manager and your daily journal live in separate tools, a day where plans fall apart often ends with a single lingering feeling: <em>"Today was a failure."</em>
+        </p>
+        <p>
+          <code>yarube</code> is purposefully designed to place <strong>"what you actually did today (facts)" and "your daily reflection (emotions &amp; introspection)" side by side on the exact same page</strong>.
+        </p>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Stress Relief via Expressive Writing<sup class="cite-ref"><a href="#fn-1">[1]</a></sup></h4>
+            <p>Pouring out impatience, fatigue, or raw thoughts with <code>yarube reflect</code> externalizes the mental clutter occupying your brain's working memory and resets your mind.</p>
+          </div>
+          <div class="concept-card">
+            <h4>Metacognition by Pairing Facts with Feelings<sup class="cite-ref"><a href="#fn-2">[2]</a></sup></h4>
+            <p>Writing your reflection while looking directly at the tasks (<code>TODO</code>) you actually moved forward right above it prevents excessive self-criticism and helps you regain an objective perspective (metacognition).</p>
+          </div>
+        </div>
+
+        <div class="footnotes-box" aria-label="References">
+          <div id="fn-1"><strong>[1] Expressive Writing &amp; Working Memory:</strong> Psychological studies show that writing down raw thoughts and emotions reduces intrusive rumination and frees up working memory capacity (<a href="https://doi.org/10.1037/0096-3445.130.3.520" target="_blank" rel="noopener noreferrer">Klein &amp; Boals, 2001</a> / <a href="https://doi.org/10.1037/0021-843X.95.3.274" target="_blank" rel="noopener noreferrer">Pennebaker &amp; Beall, 1986</a>).</div>
+          <div id="fn-2"><strong>[2] Visualizing Small Wins (The Progress Principle):</strong> Multi-year diary studies of knowledge workers reveal that the single most important factor boosting daily motivation and emotional well-being is recognizing incremental progress ("Small Wins") (<a href="https://hbr.org/2011/05/the-power-of-small-wins" target="_blank" rel="noopener noreferrer">Teresa Amabile &amp; Steven Kramer, 2011 — Harvard Business Review</a>).</div>
         </div>
       </div>
     </div>
@@ -335,6 +364,74 @@ $ yarube browse</div>
           <span>Run <code>yarube theme</code> without arguments to preview all 4 color palettes directly in your terminal.</span>
           <code>yarube theme &lt;name&gt;</code>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3.5: Extensible Plugins & Local AI Coach -->
+  <section class="section" id="plugins">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">Extensible Plugins</span>
+        <h2 class="section-title">Plugin Ecosystem &amp; Local AI Coach (<code>yarube-coach</code>)</h2>
+        <p class="section-subtitle">Keep the core binary ultra-fast and zero-dependency while extending your workflow with process-isolated plugins.</p>
+      </div>
+
+      <div class="philosophy-layout">
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">Official Plugin #1 — yarube-coach</div>
+            <h3>A Local AI Coach for "Written Meditation"<sup class="cite-ref"><a href="#fn-3">[3]</a></sup></h3>
+            <p>
+              Rather than pushing unsolicited advice, <code>yarube-coach</code> first acknowledges your feelings and asks <strong>just one focused question</strong> that directs your attention to concrete facts or a specific starting point. With nobody watching and 100% offline privacy, you can deepen your "written meditation" in a completely safe space.
+            </p>
+            <p>
+              Powered by <a href="https://github.com/huggingface/candle" target="_blank" rel="noopener noreferrer">Candle</a> and <strong>Qwen3-1.7B (GGUF)</strong>, it runs entirely on your CPU with zero network calls and no GPU required. Saving your journal always happens first, so your notes are safe even if a plugin is absent.
+            </p>
+          </div>
+          <div class="raw-md-box"><span class="t-comment"># Build &amp; set up the yarube-coach plugin</span>
+$ cargo build --release --manifest-path plugins/yarube-coach/Cargo.toml
+$ cp plugins/yarube-coach/target/release/yarube-coach ~/.local/bin/
+$ yarube-coach setup
+$ yarube-coach status</div>
+        </div>
+
+        <div class="doc-panel">
+          <div>
+            <div class="doc-panel-label">On-Reflect Hook Output</div>
+            <h3>One Gentle Question After You Reflect</h3>
+            <p>
+              Right after <code>yarube reflect</code> saves your entry, the coach streams back empathetic acknowledgment and one question styled in your active color theme, appending it to your daily Markdown log using safe standard symbols (<code>&gt; [Coach]</code>).
+            </p>
+            <p>
+              Customize the system prompt and few-shot examples anytime in <code>~/.config/yarube/coach_prompt.toml</code>, or add your own custom plugins in any language.
+            </p>
+          </div>
+          <div class="terminal-window" style="margin-top: 0.5rem;">
+            <div class="terminal-bar">
+              <div class="window-dots" aria-hidden="true">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="terminal-title">yarube reflect — on_reflect hook</div>
+              <div style="width: 38px;"></div>
+            </div>
+            <div class="terminal-body theme-tokyo-night" style="font-size: 0.78rem;">
+<div class="t-line p-sec">#### △ Reflection</div>
+<div class="t-line p-refl">Switched to EndeavourOS! Everything runs super smoothly.</div>
+<div class="t-line p-refl">Still don't feel like writing tests... only uncertain specs.</div>
+<div class="t-line p-coach">&gt; [Coach] It sounds like you're enjoying your comfortable new OS,</div>
+<div class="t-line p-coach">&gt; yet feeling weighed down about testing due to the uncertainty.</div>
+<div class="t-line p-coach">&gt; Question: Setting the uncertain parts aside for a moment, what is</div>
+<div class="t-line p-coach">&gt; the smallest piece that you know for sure right now?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footnotes-box" aria-label="Plugin References">
+        <div id="fn-3"><strong>[3] Affect Labeling &amp; Self-Distancing (Metacognition):</strong> Putting feelings into words and stepping back to observe concrete facts dampens amygdala reactivity and deepens objective self-insight (<a href="https://doi.org/10.1111/j.1467-9280.2007.01916.x" target="_blank" rel="noopener noreferrer">Lieberman et al., 2007</a> / <a href="https://doi.org/10.1177/0963721411408883" target="_blank" rel="noopener noreferrer">Kross &amp; Ayduk, 2011</a>).</div>
       </div>
     </div>
   </section>

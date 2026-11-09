@@ -15,6 +15,17 @@
 
 ---
 
+## コンセプト：なぜ「TODO」と「ふりかえり」を1ページにまとめるのか？
+
+タスク管理ツールと日記（ジャーナリング）が別々に分かれていると、計画が崩れた日に「今日はダメだった」というネガティブな感情だけで1日を終えてしまいがちです。
+
+`yarube` は、**「今日やったこと（事実）」と「ふりかえり（感情・内省）」を1日の同じ1ページに並べる**ことにこだわって設計されています。
+
+- **心の吐き出し（筆記開示）によるストレス軽減**: 焦りや疲れをそのまま `yarube reflect` で吐き出すことで、脳のワーキングメモリを圧迫しているモヤモヤを外部化し、頭をリセットします[^1]。
+- **事実と感情を並べることによるメタ認知**: すぐ上に「今日実際に手を動かしたタスク（TODO）」が見えている状態でふりかえりを書くことで、過度な自己否定を防ぎ、客観的な視点（メタ認知）を取り戻しやすくなります[^2]。
+
+---
+
 ## 特徴 (Features)
 
 - **思考を止めないゼロ摩擦の記録（0.1秒以内）**
@@ -168,6 +179,77 @@ yarube config lang en
 
 ---
 
+## プラグイン拡張 (Plugins)
+
+`yarube` は本体の「外部クレート依存ゼロ・0.1秒以内の爆速動作」を一切損なわないよう、**完全にプロセス隔離されたプラグイン機構**を採用しています。
+プラグインは `plugins/` ディレクトリ（実行時は `~/.local/share/yarube/plugins` または `$PATH` 上の `yarube-<name>`）として独立しており、Rust・Python・Bash など任意の言語で自由に追加・拡張できます。手帳へのテキスト保存が常に最優先されるため、プラグインが未導入でもエラー時でも、日々の記録が失われることはありません。
+
+### プラグインの仕組み
+
+- **サブコマンド委譲 (`yarube <name>`)**: 組み込みコマンドにないサブコマンドを実行すると、`yarube-<name>` バイナリ／スクリプトへ引数がそのまま引き継がれます。
+- **ライフサイクルフック (`on_reflect` など)**: `yarube reflect` でふりかえりを保存した直後、子プロセスの標準入力（`stdin`）へ1行の JSON ペイロード（`event`, `date`, `log_path`, `added_text`）を渡し、現在のテーマ色や言語設定（`YARUBE_LANG`, `YARUBE_THEME_NAME`, `YARUBE_COLOR_COACH`, `YARUBE_LOG_PATH`, `YARUBE_CONFIG_PATH`）を環境変数で自動注入します。
+- **自由な着脱 (Opt-In / Opt-Out)**: `~/.config/yarube/config.toml` の設定だけで、使いたいプラグインだけをいつでも ON / OFF できます。
+
+### 公式プラグイン一覧
+
+*（今後、集計や自動化など新しいプラグインを順次追加予定です！）*
+
+| プラグイン名 | 実行ファイル | フック / コマンド | 概要 |
+| :--- | :--- | :--- | :--- |
+| **[`yarube-coach`](plugins/yarube-coach)** | `yarube-coach` | `on_reflect` / `yarube coach` | Qwen3-1.7B (GGUF) を用いた完全ローカル・CPU推論のふりかえりAIコーチ |
+
+---
+
+### 1. ローカルAI内省コーチ (`yarube-coach`)
+
+**`yarube-coach`** は、[Candle](https://github.com/huggingface/candle) と **Qwen3-1.7B (GGUF)** を用いた、完全オフライン・プライバシー保護設計のふりかえりコーチプラグインです。
+`yarube reflect` で日々の所感を書き残すと、**外部ネットワーク通信や GPU に一切依存せず CPU 推論のみ**で、感情の受容と客観視（メタ認知）を促す**「1つの問い」**をストリーミング表示し、当日の手帳末尾へ安全に追記します：
+
+- **「書く瞑想」を助けるローカルAIコーチ**: `yarube-coach` はアドバイスを押し付けるのではなく、感情を受け止めたうえで「具体的な事実や箇所」に目を向ける問いかけを1つだけ返します。誰の目も気にせず、完全オフラインの安全な環境で「書く瞑想」を深めることができます[^3]。
+
+```markdown
+#### △ ふりかえり
+EndeavourOSにしたあき！サクサク動いて読書も快適になった。
+ただ、仕事のテストを作る気が起きない……未確定情報しかない。
+> [Coach] 環境が快適になって読書や操作が楽しくなった一方、お仕事のテストには気持ちが向かずモヤモヤしているのですね。
+> 質問：未確定な部分を一旦脇に置いたとき、今の時点で「これだけは確定している」と言える最小の箇所はどこですか？
+```
+
+#### ビルドと初期セットアップ (`yarube-coach`)
+
+```bash
+# プラグイン単体のリリースビルド（本体ワークスペースとは分離されています）
+cargo build --release --manifest-path plugins/yarube-coach/Cargo.toml
+
+# パスの通ったディレクトリまたはプラグインディレクトリへ配置（例: ~/.local/bin）
+cp plugins/yarube-coach/target/release/yarube-coach ~/.local/bin/
+
+# デフォルトプロンプト設定の生成 ＆ 推奨モデル(Qwen3-1.7B GGUF)・トークナイザの自動ダウンロード
+yarube-coach setup
+# （自動ダウンロードせず、設定ファイル生成と手動 curl コマンドの確認のみ行う場合）
+yarube-coach setup --no-download
+
+# モデル・トークナイザ・プロンプト設定の導入状態を確認
+yarube-coach status
+```
+
+#### プロンプトと推論パラメータのカスタマイズ
+
+- **プロンプト定義 (`~/.config/yarube/coach_prompt.toml`)**: `setup` 実行時に生成される TOML ファイルを編集することで、システム指示文（`system`）や Few-shot 例示（`[[examples]]`）を自分好みにカスタマイズできます。ファイルが存在しない場合や構文エラー時は、内蔵のデフォルトプロンプト（日・英）へ安全にフォールバックします。
+- **設定ファイル (`~/.config/yarube/config.toml`)**:
+  ```toml
+  [plugins.coach]
+  enabled = true
+  model_path = "~/.local/share/yarube/models/Qwen3-1.7B-Q8_0.gguf"
+  tokenizer_path = "~/.local/share/yarube/models/tokenizer.json"
+  max_tokens = 100
+  temperature = 0.3
+  top_k = 10
+  top_p = 0.8
+  ```
+
+---
+
 ## アーキテクチャとテスト (Architecture & Tests)
 
 高凝集・疎結合・テスト容易性を重視したレイヤード構成（Ports & Adapters）を採用しています。
@@ -197,3 +279,9 @@ cargo test
 5. **EARS（Easy Approach to Requirements Syntax）**: イベント駆動型・状態駆動型・遍在型・不要動作型による曖昧さのないシステム要件記述
 
 最初に `US-01`・`US-02` のコア体験を作って実際にターミナルで触り、そこから `US-03`（エディタ設定）、`US-04`（ページめくり・検索）、`US-05`（日英バイリンガル）、`US-06`（カラーテーマ）へと段階的に要求ツリーを育てながら、高凝集・疎結合な設計と全21観点（`TP-01`〜`TP-21`）の自動テストを一気通貫で作り上げています。
+
+---
+
+[^1]: **筆記開示（Expressive Writing）とワーキングメモリ**: 不安や感情をありのまま書き出すことで反芻思考（ぐるぐる思考）が減り、脳のワーキングメモリ空き容量が回復することが心理学研究で示されています（[Klein & Boals (2001), *Expressive writing can increase working memory capacity*](https://doi.org/10.1037/0096-3445.130.3.520) / [Pennebaker & Beall (1986)](https://doi.org/10.1037/0021-843X.95.3.274)）。
+[^2]: **小さな前進の可視化（The Progress Principle）**: 日々の業務日誌の研究において、モチベーションや感情を最も左右するのは「日々の小さな前進（Small Wins）に気づけること」であると報告されています（[Teresa Amabile & Steven Kramer (2011), *The Power of Small Wins*, Harvard Business Review](https://hbr.org/2011/05/the-power-of-small-wins)）。TODO（事実）とふりかえり（感情）を1ページに並べることで、計画通りにいかなかった日でも「実際に進んだ一歩」を見落とさずに済みます。
+[^3]: **感情の言語化（Affect Labeling）とメタ認知（Self-Distancing）**: モヤモヤした感情を言葉にし、一歩引いた視点から事実を見つめ直すことで、扁桃体の過剰な反応が鎮まり客観的な自己洞察が深まることが知られています（[Lieberman et al. (2007), *Putting Feelings Into Words*](https://doi.org/10.1111/j.1467-9280.2007.01916.x) / [Kross & Ayduk (2011), *Making Meaning out of Negative Experiences by Self-Distancing*](https://doi.org/10.1177/0963721411408883)）。
