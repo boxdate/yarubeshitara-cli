@@ -1,10 +1,22 @@
-# Rust / Cargo build artifacts
-/target/
-**/*.rs.bk
+# Rust ビルド成果物（サブディレクトリも含めてすべて除外）
+**/target/
+target/
 
-# Editor / OS temporary files
+# C/C++ / CMake / make 等の自動生成ファイル
+**/build/
+**/Makefile.in
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# IDE / エディタ設定
+.vscode/
+.idea/
 *.swp
-*.swo
 *~
+
+# OS 生成ファイル
 .DS_Store
-.env
+Thumbs.db
