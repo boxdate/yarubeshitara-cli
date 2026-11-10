@@ -179,10 +179,12 @@ fn test_load_coach_config_defaults_and_custom() {
         "~/.local/share/yarube/models/tokenizer.json"
     );
     assert_eq!(default_cfg.prompt_path, None);
-    assert_eq!(default_cfg.max_tokens, 100);
+    assert_eq!(default_cfg.max_tokens, 256);
     assert!((default_cfg.temperature - 0.3).abs() < 1e-9);
     assert_eq!(default_cfg.top_k, 10);
     assert!((default_cfg.top_p - 0.8).abs() < 1e-9);
+    assert!((default_cfg.repeat_penalty - 1.1).abs() < 1e-6);
+    assert_eq!(default_cfg.repeat_last_n, 64);
 
     let custom_path = dir.join("config.toml");
     std::fs::write(
@@ -200,6 +202,8 @@ max_tokens = 64
 temperature = 0.5
 top_k = 20
 top_p = 0.9
+repeat_penalty = 1.2
+repeat_last_n = 32
 "#,
     )
     .unwrap();
@@ -216,6 +220,8 @@ top_p = 0.9
     assert!((custom_cfg.temperature - 0.5).abs() < 1e-9);
     assert_eq!(custom_cfg.top_k, 20);
     assert!((custom_cfg.top_p - 0.9).abs() < 1e-9);
+    assert!((custom_cfg.repeat_penalty - 1.2).abs() < 1e-6);
+    assert_eq!(custom_cfg.repeat_last_n, 32);
 
     let _ = std::fs::remove_dir_all(&dir);
 }

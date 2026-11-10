@@ -18,10 +18,12 @@ pub const FALLBACK_MODEL_PATH: &str = "~/.local/share/yarube/models/model.gguf";
 pub const DEFAULT_TOKENIZER_PATH: &str = "~/.local/share/yarube/models/tokenizer.json";
 pub const DEFAULT_USER_PROMPT_JA: &str = "~/.config/yarube/coach_prompt.toml";
 pub const DEFAULT_USER_PROMPT_EN: &str = "~/.config/yarube/coach_prompt_en.toml";
-pub const DEFAULT_MAX_TOKENS: usize = 100;
+pub const DEFAULT_MAX_TOKENS: usize = 256; //default=100
 pub const DEFAULT_TEMPERATURE: f64 = 0.3;
 pub const DEFAULT_TOP_K: usize = 10;
 pub const DEFAULT_TOP_P: f64 = 0.8;
+pub const DEFAULT_REPEAT_PENALTY: f32 = 1.1;
+pub const DEFAULT_REPEAT_LAST_N: usize = 64;
 pub const DEFAULT_COACH_HEX: &str = "#7dcfff";
 pub const DEFAULT_COACH_RGB: (u8, u8, u8) = (0x7d, 0xcf, 0xff);
 
@@ -63,6 +65,8 @@ pub struct CoachConfig {
     pub temperature: f64,
     pub top_k: usize,
     pub top_p: f64,
+    pub repeat_penalty: f32,
+    pub repeat_last_n: usize,
 }
 
 impl Default for CoachConfig {
@@ -76,6 +80,8 @@ impl Default for CoachConfig {
             temperature: DEFAULT_TEMPERATURE,
             top_k: DEFAULT_TOP_K,
             top_p: DEFAULT_TOP_P,
+            repeat_penalty: DEFAULT_REPEAT_PENALTY,
+            repeat_last_n: DEFAULT_REPEAT_LAST_N,
         }
     }
 }
