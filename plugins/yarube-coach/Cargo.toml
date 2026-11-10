@@ -21,8 +21,11 @@ toml = "0.8"
 
 [profile.release]
 opt-level = 2
-lto = true
-codegen-units = 4
+lto = "off"
+codegen-units = 16
+
+[profile.release.package.yarube-coach]
+opt-level = 0
 
 [profile.dev]
 debug = false

@@ -7,6 +7,7 @@ use candle_core::quantized::gguf_file;
 use candle_core::{Device, Tensor};
 use candle_transformers::generation::{LogitsProcessor, Sampling};
 use candle_transformers::models::quantized_qwen3::ModelWeights;
+use candle_transformers::utils::apply_repeat_penalty;
 use std::env;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
@@ -192,6 +193,32 @@ pub fn run_coach() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
+    let get_penalty_context = |gen: &[u32], prompt: &[u32], n: usize| -> Vec<u32> {
+        if n == 0 {
+            return Vec::new();
+        }
+        if gen.len() >= n {
+            gen[gen.len() - n..].to_vec()
+        } else {
+            let needed = n - gen.len();
+            let p_start = prompt.len().saturating_sub(needed);
+            let mut ctx = Vec::with_capacity(n);
+            ctx.extend_from_slice(&prompt[p_start..]);
+            ctx.extend_from_slice(gen);
+            ctx
+        }
+    };
+
+    let apply_penalty = |logits: Tensor, ctx: &[u32]| -> Tensor {
+        if (coach_cfg.repeat_penalty - 1.0).abs() > 1e-6 && !ctx.is_empty() {
+            apply_repeat_penalty(&logits, coach_cfg.repeat_penalty, ctx).unwrap_or(logits)
+        } else {
+            logits
+        }
+    };
+
+    let first_ctx = get_penalty_context(&[], prompt_tokens, coach_cfg.repeat_last_n);
+    let first_logits = apply_penalty(first_logits, &first_ctx);
     let mut next_token = match logits_processor.sample(&first_logits) {
         Ok(t) => t,
         Err(_) => {
@@ -220,6 +247,8 @@ pub fn run_coach() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(l) => l,
                 Err(_) => break,
             };
+            let ctx = get_penalty_context(&generated_tokens, prompt_tokens, coach_cfg.repeat_last_n);
+            let logits = apply_penalty(logits, &ctx);
             next_token = match logits_processor.sample(&logits) {
                 Ok(t) => t,
                 Err(_) => break,

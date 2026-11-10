@@ -1,5 +1,9 @@
 [env]
-RUST_MIN_STACK = "134217728"
+RUST_MIN_STACK = "1073741824"
+
+[build]
+jobs = 2
+
 
 
 
