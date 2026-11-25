@@ -10,8 +10,9 @@ use crate::domain::i18n::Language;
 use crate::domain::journal::HighlightTarget;
 use crate::domain::search::search_logs;
 use crate::infra::fs_storage::FsStorage;
+use crate::infra::plugin_runner::ProcessPluginRunner;
 use crate::infra::process_editor::ProcessEditorLauncher;
-use crate::ports::{ConfigRepository, JournalRepository};
+use crate::ports::{ConfigRepository, JournalRepository, PluginEnvContext};
 use crate::ui::browse::{run_browse, run_navigate_relative};
 use crate::ui::config_ui::{run_config_editor, run_config_lang, run_config_theme};
 use crate::ui::reflect::run_reflect;
@@ -92,9 +93,26 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let editor_launcher = ProcessEditorLauncher;
     let today = LocalDate::today();
+    let plugin_env_ctx = PluginEnvContext {
+        lang,
+        log_path: storage.log_file_path(today),
+        config_path: storage.config_file_path(),
+        theme,
+    };
 
     match command {
         CliCommand::Help => unreachable!(),
+        CliCommand::ExternalPlugin { name, args: p_args } => {
+            if let Some(bin_path) = ProcessPluginRunner::resolve_plugin_binary(&cfg, &name) {
+                let code =
+                    ProcessPluginRunner::execute_subcommand(&bin_path, &p_args, &plugin_env_ctx)?;
+                if code != 0 {
+                    process::exit(code);
+                }
+            } else {
+                return Err(format!("プラグイン `yarube-{}` が見つかりません。", name).into());
+            }
+        }
         CliCommand::ShowToday => {
             let res = storage.load_or_init(today)?;
             render_daily_log_with_options(
@@ -106,6 +124,27 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
         CliCommand::AddTask(text) => {
+            // Dynamic subcommand dispatch (US-09 / AC-17 / EARS-29):
+            // When `yarube <name> [args...]` was not explicitly prefixed with `t` or `•`,
+            // check if `yarube-<name>` exists in `plugins.dir` or `$PATH`.
+            if let Some(first_arg) = args.first() {
+                if first_arg != "t" && first_arg != "•" {
+                    if let Some(bin_path) =
+                        ProcessPluginRunner::resolve_plugin_binary(&cfg, first_arg)
+                    {
+                        let code = ProcessPluginRunner::execute_subcommand(
+                            &bin_path,
+                            &args[1..],
+                            &plugin_env_ctx,
+                        )?;
+                        if code != 0 {
+                            process::exit(code);
+                        }
+                        return Ok(());
+                    }
+                }
+            }
+
             let mut res = storage.load_or_init(today)?;
             let idx = res.log.add_task(text);
             storage.save(&res.log)?;

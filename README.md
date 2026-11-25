@@ -197,6 +197,7 @@ Plugins live in `plugins/` (or `~/.local/share/yarube/plugins` and `$PATH` as `y
 | Plugin | Binary | Hook / Command | Description |
 | :--- | :--- | :--- | :--- |
 | **[`yarube-coach`](plugins/yarube-coach)** | `yarube-coach` | `on_reflect` / `yarube coach` | 100% local, offline CPU AI reflection coach powered by Qwen3-1.7B (GGUF) |
+| **[`yarube-coach-ja`](plugins/yarube-coach-ja)** | `yarube-coach-ja` | `on_reflect` / `yarube coach-ja` | 2-stage Pure Rust reflection coach (PLaMo 3 Translate 0.8B × Qwen3-1.7B) with JSON dialect switching |
 
 ---
 

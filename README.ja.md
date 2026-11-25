@@ -197,6 +197,7 @@ yarube config lang en
 | プラグイン名 | 実行ファイル | フック / コマンド | 概要 |
 | :--- | :--- | :--- | :--- |
 | **[`yarube-coach`](plugins/yarube-coach)** | `yarube-coach` | `on_reflect` / `yarube coach` | Qwen3-1.7B (GGUF) を用いた完全ローカル・CPU推論のふりかえりAIコーチ |
+| **[`yarube-coach-ja`](plugins/yarube-coach-ja)** | `yarube-coach-ja` | `on_reflect` / `yarube coach-ja` | PLaMo 3 Translate 0.8B × Qwen3-1.7B 2段推論（日→英→英語コーチング→英→日/方言）内省AIコーチ |
 
 ---
 
@@ -247,6 +248,34 @@ yarube-coach status
   top_k = 10
   top_p = 0.8
   ```
+
+---
+
+### 2. 2段推論＋方言切替ローカルAI内省コーチ (`yarube-coach-ja`)
+
+**`yarube-coach-ja`** は、`candle-plamo3`（**PLaMo 3 Translate 0.8B**）と **Qwen3-1.7B** を組み合わせ、思考と翻訳・口調制御を分離した 100% Pure Rust 2段推論プラグインです。
+
+1. **Step 1 (JA → EN)**: PLaMo 3 Translate 0.8B (`pfml3::prompt_ja_to_en`) で日本語ふりかえりを英語へ翻訳
+2. **Step 2 (EN Coaching)**: Qwen3-1.7B で英語のまま「1文の共感＋1つの具体的な問い」を推論
+3. **Step 3 (EN → JA / 方言)**: PLaMo 3 Translate 0.8B (`pfml3::prompt_en_to_ja_with_config`) と外部 JSON 方言プロファイル（`DialectConfig`）で、選択中の方言・口調へ翻訳しながらストリーミング出力
+
+```bash
+# ビルドと配置
+cargo build --release --manifest-path plugins/yarube-coach-ja/Cargo.toml
+cp plugins/yarube-coach-ja/target/release/yarube-coach-ja ~/.local/bin/
+
+# 方言JSON (standard_polite / hokkaido_donan / kansai) の展開とモデルのセットアップ
+yarube coach-ja setup
+
+# 口調・方言の切り替え（対話メニューまたは直接指定）
+yarube coach-ja dialect
+yarube coach-ja dialect hokkaido_donan   # 北海道・道南弁（やるべしたらモード）
+yarube coach-ja dialect standard_polite  # 標準語（です・ます調）
+yarube coach-ja dialect kansai           # 関西弁（おかん・先輩コーチモード）
+
+# 導入状態と現在の方言設定を確認
+yarube coach-ja status
+```
 
 ---
 

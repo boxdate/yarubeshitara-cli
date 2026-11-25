@@ -117,6 +117,7 @@ impl ThemeName {
                 cancelled_task: StyleSpec::dim_strike(0x56, 0x5f, 0x89, "#565f89"),
                 subtask: StyleSpec::normal(0x9a, 0xa5, 0xce, "#9aa5ce"),
                 reflection_body: StyleSpec::normal(0xc0, 0xca, 0xf5, "#c0caf5"),
+                coach_text: StyleSpec::normal(0x7d, 0xcf, 0xff, "#7dcfff"),
                 new_badge: StyleSpec::bold(0x9e, 0xce, 0x6a, "#9ece6a"),
                 divider: StyleSpec::dim(0x3b, 0x42, 0x61, "#3b4261"),
             },
@@ -129,6 +130,7 @@ impl ThemeName {
                 cancelled_task: StyleSpec::dim_strike(0x75, 0x71, 0x5e, "#75715e"),
                 subtask: StyleSpec::normal(0xa6, 0xe2, 0x2e, "#a6e22e"),
                 reflection_body: StyleSpec::normal(0xf8, 0xf8, 0xf2, "#f8f8f2"),
+                coach_text: StyleSpec::normal(0xae, 0x81, 0xff, "#ae81ff"),
                 new_badge: StyleSpec::bold(0xa6, 0xe2, 0x2e, "#a6e22e"),
                 divider: StyleSpec::dim(0x49, 0x48, 0x3e, "#49483e"),
             },
@@ -141,6 +143,7 @@ impl ThemeName {
                 cancelled_task: StyleSpec::dim_strike(0x4c, 0x56, 0x6a, "#4c566a"),
                 subtask: StyleSpec::normal(0xd8, 0xde, 0xe9, "#d8dee9"),
                 reflection_body: StyleSpec::normal(0xec, 0xef, 0xf4, "#eceff4"),
+                coach_text: StyleSpec::normal(0x8f, 0xbc, 0xbb, "#8fbcbb"),
                 new_badge: StyleSpec::bold(0xa3, 0xbe, 0x8c, "#a3be8c"),
                 divider: StyleSpec::dim(0x3b, 0x42, 0x52, "#3b4252"),
             },
@@ -153,6 +156,7 @@ impl ThemeName {
                 cancelled_task: StyleSpec::dim_strike(0x8c, 0x82, 0x75, "#8c8275"),
                 subtask: StyleSpec::normal(0xdd, 0xb8, 0x92, "#ddb892"),
                 reflection_body: StyleSpec::normal(0xfa, 0xed, 0xcd, "#faedcd"),
+                coach_text: StyleSpec::normal(0x6b, 0x70, 0x5c, "#6b705c"),
                 new_badge: StyleSpec::bold(0x6b, 0x70, 0x5c, "#6b705c"),
                 divider: StyleSpec::dim(0xd5, 0xbd, 0xaf, "#d5bdaf"),
             },
@@ -246,6 +250,7 @@ pub struct ThemePalette {
     pub cancelled_task: StyleSpec,
     pub subtask: StyleSpec,
     pub reflection_body: StyleSpec,
+    pub coach_text: StyleSpec,
     pub new_badge: StyleSpec,
     pub divider: StyleSpec,
 }
@@ -278,5 +283,10 @@ mod tests {
 
         assert_eq!(p.done_task.hex, "#75715e");
         assert_eq!(p.done_task.ansi_prefix(), "\x1b[2;9;38;2;117;113;94m");
+
+        assert_eq!(ThemeName::TokyoNight.palette().coach_text.hex, "#7dcfff");
+        assert_eq!(ThemeName::Monokai.palette().coach_text.hex, "#ae81ff");
+        assert_eq!(ThemeName::Nord.palette().coach_text.hex, "#8fbcbb");
+        assert_eq!(ThemeName::Sepia.palette().coach_text.hex, "#6b705c");
     }
 }

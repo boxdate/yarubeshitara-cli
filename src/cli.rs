@@ -11,6 +11,7 @@ pub enum CliCommand {
     NavigateRelative(isize),
     Browse,
     Search(String),
+    ExternalPlugin { name: String, args: Vec<String> },
     Help,
 }
 
@@ -137,6 +138,18 @@ pub fn parse_args(args: &[String]) -> Result<CliCommand, String> {
                 return Err("タスクの内容を入力してください（例: yarube t タスク内容）".to_string());
             }
             return Ok(CliCommand::AddTask(trimmed.to_string()));
+        }
+        "plugin" => {
+            if args.len() < 2 || args[1].trim().is_empty() {
+                return Err(
+                    "プラグイン名を指定してください（例: yarube plugin <name> [args...]）"
+                        .to_string(),
+                );
+            }
+            return Ok(CliCommand::ExternalPlugin {
+                name: args[1].trim().to_string(),
+                args: args[2..].to_vec(),
+            });
         }
         _ => {}
     }
