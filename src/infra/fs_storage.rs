@@ -1,4 +1,4 @@
-use crate::domain::config::AppConfig;
+use crate::domain::config::{ensure_abs_path, expand_tilde, home_dir, resolve_abs_path, AppConfig};
 use crate::domain::date::LocalDate;
 use crate::domain::i18n::Language;
 use crate::domain::journal::{DailyLog, Task, TaskStatus};
@@ -10,6 +10,7 @@ use std::path::PathBuf;
 
 pub struct FsStorage {
     base_dir: PathBuf,
+    explicit_dir: bool,
 }
 
 impl FsStorage {
@@ -18,36 +19,76 @@ impl FsStorage {
             if let Ok(dir) = env::var(key) {
                 if !dir.trim().is_empty() {
                     return Ok(Self {
-                        base_dir: PathBuf::from(dir),
+                        base_dir: resolve_abs_path(&dir),
+                        explicit_dir: true,
                     });
                 }
             }
         }
         Ok(Self {
             base_dir: Self::default_dir()?,
+            explicit_dir: false,
         })
     }
 
     pub fn new(base_dir: PathBuf) -> Self {
-        Self { base_dir }
+        Self {
+            base_dir: ensure_abs_path(base_dir),
+            explicit_dir: true,
+        }
     }
 
     fn default_dir() -> io::Result<PathBuf> {
-        let home = env::var("HOME").map_err(|_| {
+        let home = home_dir().ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::NotFound,
                 "HOME 環境変数が見つかりません。YARUBE_DIR を設定してください。",
             )
         })?;
-        Ok(PathBuf::from(home).join(".yarube"))
+        Ok(ensure_abs_path(home.join(".yarube")))
     }
 
     pub fn file_path(&self, date: LocalDate) -> PathBuf {
         self.base_dir.join(format!("{}.md", date.format_ymd()))
     }
 
+    fn candidate_config_paths(&self) -> Vec<PathBuf> {
+        let mut candidates = vec![
+            self.base_dir.join("config.toml"),
+            self.base_dir.join("config"),
+        ];
+        if !self.explicit_dir {
+            if let Ok(xdg) = env::var("XDG_CONFIG_HOME") {
+                if !xdg.trim().is_empty() {
+                    let xdg_dir = expand_tilde(&xdg).join("yarube");
+                    candidates.push(xdg_dir.join("config.toml"));
+                    candidates.push(xdg_dir.join("config"));
+                }
+            }
+            if let Some(home) = home_dir() {
+                let home_cfg_dir = home.join(".config").join("yarube");
+                candidates.push(home_cfg_dir.join("config.toml"));
+                candidates.push(home_cfg_dir.join("config"));
+            }
+        }
+        candidates
+    }
+
     pub fn config_path(&self) -> PathBuf {
-        self.base_dir.join("config")
+        for candidate in self.candidate_config_paths() {
+            if candidate.exists() {
+                return candidate;
+            }
+        }
+        self.base_dir.join("config.toml")
+    }
+
+    pub fn abs_file_path(&self, date: LocalDate) -> PathBuf {
+        ensure_abs_path(self.file_path(date))
+    }
+
+    pub fn abs_config_path(&self) -> PathBuf {
+        ensure_abs_path(self.config_path())
     }
 
     pub fn active_language(&self) -> Language {
@@ -153,26 +194,51 @@ impl JournalRepository for FsStorage {
         }
         Ok(logs)
     }
+
+    fn log_file_path(&self, date: LocalDate) -> PathBuf {
+        self.abs_file_path(date)
+    }
 }
 
 impl ConfigRepository for FsStorage {
     fn load_config(&self) -> io::Result<AppConfig> {
-        let path = self.config_path();
-        if !path.exists() {
-            return Ok(AppConfig::default());
+        for candidate in self.candidate_config_paths() {
+            if candidate.exists() {
+                let content = fs::read_to_string(&candidate)?;
+                return Ok(AppConfig::parse(&content));
+            }
         }
-        let content = fs::read_to_string(&path)?;
-        Ok(AppConfig::parse(&content))
+        Ok(AppConfig::default())
     }
 
     fn save_config(&self, config: &AppConfig) -> io::Result<()> {
         fs::create_dir_all(&self.base_dir)?;
-        let path = self.config_path();
-        let tmp_path = self
-            .base_dir
-            .join(format!(".config.tmp.{}", std::process::id()));
-        fs::write(&tmp_path, config.to_config_string())?;
-        fs::rename(&tmp_path, &path)?;
+        let content = config.to_config_string();
+        for target_name in ["config.toml", "config"] {
+            let path = self.base_dir.join(target_name);
+            let tmp_path = self
+                .base_dir
+                .join(format!(".{}.tmp.{}", target_name, std::process::id()));
+            fs::write(&tmp_path, &content)?;
+            fs::rename(&tmp_path, &path)?;
+        }
+        // If an external XDG config (`~/.config/yarube/config.toml`) already exists and we are not in explicit_dir mode, keep it in sync as well.
+        if !self.explicit_dir {
+            for candidate in self.candidate_config_paths().into_iter().skip(2) {
+                if candidate.exists() {
+                    if let Some(parent) = candidate.parent() {
+                        let tmp_path = parent.join(format!(".config.tmp.{}", std::process::id()));
+                        if fs::write(&tmp_path, &content).is_ok() {
+                            let _ = fs::rename(&tmp_path, &candidate);
+                        }
+                    }
+                }
+            }
+        }
         Ok(())
+    }
+
+    fn config_file_path(&self) -> PathBuf {
+        self.abs_config_path()
     }
 }

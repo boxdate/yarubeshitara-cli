@@ -832,4 +832,386 @@ fn tp21_unknown_theme_name_warns_and_falls_back_to_tokyo_night_without_crashing(
     );
 }
 
+/// [TP-26 / BDD 08-1 / EARS-26]
+/// Given: プラグインが存在しない環境
+/// When: yarube reflect で文章を入力し保存
+/// Then: '△ ふりかえり'へ文章が永続化され、フック実行のみを静かにスキップして正常終了する
+#[test]
+fn tp26_bdd08_1_reflect_succeeds_and_silently_skips_when_plugin_missing() {
+    let env = TestEnv::new("2026-10-17");
+    let non_existent_plugins_dir = env.dir.join("no_such_plugins_dir");
+
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[plugins]\ndir = \"{}\"\non_reflect = [\"coach\"]\n",
+            non_existent_plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let out = env
+        .cmd()
+        .args([
+            "reflect",
+            "プラグイン不在でも確実に保存されるふりかえりテキスト。",
+        ])
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "yarube reflect must exit with code 0 even when plugin does not exist"
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.trim().is_empty(),
+        "Missing plugin should be silently skipped without error, stderr:\n{}",
+        stderr
+    );
+
+    let saved = env.read_log("2026-10-17");
+    assert!(
+        saved.contains("#### △ ふりかえり\nプラグイン不在でも確実に保存されるふりかえりテキスト。\n"),
+        "Reflection must be persisted:\n{}",
+        saved
+    );
+}
+
+/// [TP-27 / BDD 08-2 / EARS-27]
+/// Given: フックプラグインが異常終了(exit 1)する状態
+/// When: yarube reflect を実行
+/// Then: ふりかえり保存は成功し（フック起動時点で既にファイルへ保存完了しておりロールバックされない）、本体はクラッシュせず警告のみを出して終了コード0で完了する
+#[test]
+fn tp27_bdd08_2_reflect_preserves_log_and_exits_zero_when_hook_plugin_fails() {
+    let env = TestEnv::new("2026-10-17");
+    let plugins_dir = env.dir.join("plugins");
+    fs::create_dir_all(&plugins_dir).unwrap();
+
+    // Dummy plugin `yarube-coach` that verifies the log file ALREADY contains the reflection before crashing with exit 1
+    let snapshot_file = env.dir.join("log_snapshot_during_hook.md");
+    let coach_bin = plugins_dir.join("yarube-coach");
+    fs::write(
+        &coach_bin,
+        format!(
+            "#!/bin/sh\ncp \"$YARUBE_LOG_PATH\" \"{}\"\nexit 1\n",
+            snapshot_file.display()
+        ),
+    )
+    .unwrap();
+    let _ = Command::new("chmod")
+        .args(["+x", coach_bin.to_str().unwrap()])
+        .status();
+
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[plugins]\ndir = \"{}\"\non_reflect = [\"coach\"]\n",
+            plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let out = env
+        .cmd()
+        .args([
+            "reflect",
+            "プラグインがクラッシュしても絶対に失われない内省記録。",
+        ])
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "yarube reflect must exit 0 even when hook plugin exits with 1"
+    );
+
+    // Verify EARS-26: The file was ALREADY persisted & flushed when the hook started
+    let snapshot = fs::read_to_string(&snapshot_file)
+        .expect("hook should have been able to read already-flushed log file");
+    assert!(
+        snapshot.contains("プラグインがクラッシュしても絶対に失われない内省記録。"),
+        "Log file must be flushed BEFORE hook executes:\n{}",
+        snapshot
+    );
+
+    // Verify EARS-27: Saved log is not rolled back after plugin failure
+    let saved = env.read_log("2026-10-17");
+    assert!(
+        saved.contains("#### △ ふりかえり\nプラグインがクラッシュしても絶対に失われない内省記録。\n"),
+        "Saved log must remain intact:\n{}",
+        saved
+    );
+}
+
+/// [TP-28 / BDD 08-3 / EARS-28]
+/// Given: プラグインが導入済み
+/// When: 設定ファイルで plugins.on_reflect = [] または enabled = false を指定
+/// Then: 次回実行時からプラグインプロセスが一切起動せずコア機能のみで動作する
+#[test]
+fn tp28_bdd08_3_selective_plugin_disable_via_config_on_reflect_or_enabled_flag() {
+    let env = TestEnv::new("2026-10-17");
+    let plugins_dir = env.dir.join("plugins");
+    fs::create_dir_all(&plugins_dir).unwrap();
+
+    let marker_file = env.dir.join("plugin_ran.txt");
+    let coach_bin = plugins_dir.join("yarube-coach");
+    fs::write(
+        &coach_bin,
+        format!("#!/bin/sh\necho \"ran\" >> \"{}\"\n", marker_file.display()),
+    )
+    .unwrap();
+    let _ = Command::new("chmod")
+        .args(["+x", coach_bin.to_str().unwrap()])
+        .status();
+
+    // Case 1: on_reflect = []
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[plugins]\ndir = \"{}\"\non_reflect = []\n",
+            plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let out1 = env
+        .cmd()
+        .args(["reflect", "フック配列が空のときの記録"])
+        .output()
+        .unwrap();
+    assert!(out1.status.success());
+    assert!(
+        !marker_file.exists(),
+        "Plugin should NOT run when on_reflect = []"
+    );
+
+    // Case 2: on_reflect = ["coach"] but [plugins.coach] enabled = false
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[plugins]\ndir = \"{}\"\non_reflect = [\"coach\"]\n\n[plugins.coach]\nenabled = false\n",
+            plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let out2 = env
+        .cmd()
+        .args(["reflect", "enabled=falseのときの記録"])
+        .output()
+        .unwrap();
+    assert!(out2.status.success());
+    assert!(
+        !marker_file.exists(),
+        "Plugin should NOT run when [plugins.coach] enabled = false"
+    );
+}
+
+/// [TP-29 / BDD 09-1 / EARS-29]
+/// Given: プラグインフォルダ（またはPATH）に実行可能な yarube-weekly が配置されている
+/// When: yarube weekly --days 7 を実行
+/// Then: yarube-weekly に引数 '--days 7' と共通環境変数 YARUBE_* が渡されて実行される
+#[test]
+fn tp29_bdd09_1_dynamic_subcommand_dispatch_delegates_args_and_env() {
+    let env = TestEnv::new("2026-10-17");
+    let plugins_dir = env.dir.join("plugins");
+    fs::create_dir_all(&plugins_dir).unwrap();
+
+    let weekly_bin = plugins_dir.join("yarube-weekly");
+    fs::write(
+        &weekly_bin,
+        "#!/bin/sh\necho \"ARGS:$*\"\necho \"VER:$YARUBE_VERSION\"\necho \"LANG:$YARUBE_LANG\"\necho \"THEME:$YARUBE_THEME_NAME\"\necho \"COLOR:$YARUBE_COLOR_COACH\"\n",
+    )
+    .unwrap();
+    let _ = Command::new("chmod")
+        .args(["+x", weekly_bin.to_str().unwrap()])
+        .status();
+
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[general]\ntheme = \"nord\"\n\n[plugins]\ndir = \"{}\"\n",
+            plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let out = env
+        .cmd()
+        .args(["weekly", "--days", "7"])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        stdout.contains("ARGS:--days 7"),
+        "Subcommand should receive '--days 7', got:\n{}",
+        stdout
+    );
+    assert!(stdout.contains(&format!("VER:{}", env!("CARGO_PKG_VERSION"))));
+    assert!(stdout.contains("LANG:ja"));
+    assert!(stdout.contains("THEME:nord"));
+    assert!(stdout.contains("COLOR:#8fbcbb"));
+    assert!(
+        !env.log_path("2026-10-17").exists(),
+        "Delegating to external subcommand must NOT add 'weekly --days 7' as a todo task"
+    );
+
+    // Also verify PATH fallback when binary is not in plugins.dir
+    let empty_plugins_dir = env.dir.join("empty_plugins");
+    fs::create_dir_all(&empty_plugins_dir).unwrap();
+    fs::write(
+        env.dir.join("config.toml"),
+        format!("[plugins]\ndir = \"{}\"\n", empty_plugins_dir.display()),
+    )
+    .unwrap();
+    let cur_path = env::var("PATH").unwrap_or_default();
+    let new_path = format!("{}:{}", plugins_dir.display(), cur_path);
+    let out_path = env
+        .cmd()
+        .env("PATH", new_path)
+        .args(["weekly", "--from-path"])
+        .output()
+        .unwrap();
+    assert!(out_path.status.success());
+    let stdout_path = String::from_utf8_lossy(&out_path.stdout);
+    assert!(stdout_path.contains("ARGS:--from-path"));
+}
+
+/// [TP-30 / BDD 09-2 / EARS-30]
+/// Given: on_reflect に自作スクリプトが登録されている
+/// When: yarube reflect で保存が完了する
+/// Then: 子プロセスのstdinに1行JSON（event, date, log_path, added_text）が渡され、環境変数 YARUBE_COLOR_COACH 等が設定される
+#[test]
+fn tp30_bdd09_2_on_reflect_hook_receives_json_stdin_and_yarube_env_vars() {
+    let env = TestEnv::new("2026-10-17");
+    let plugins_dir = env.dir.join("plugins");
+    fs::create_dir_all(&plugins_dir).unwrap();
+
+    let captured_stdin = env.dir.join("captured_stdin.json");
+    let captured_env = env.dir.join("captured_env.txt");
+    let coach_bin = plugins_dir.join("yarube-coach");
+    fs::write(
+        &coach_bin,
+        format!(
+            "#!/bin/sh\ncat > \"{}\"\n{{\n  echo \"VERSION=$YARUBE_VERSION\"\n  echo \"LANG=$YARUBE_LANG\"\n  echo \"LOG_PATH=$YARUBE_LOG_PATH\"\n  echo \"CONFIG_PATH=$YARUBE_CONFIG_PATH\"\n  echo \"THEME_NAME=$YARUBE_THEME_NAME\"\n  echo \"COLOR_COACH=$YARUBE_COLOR_COACH\"\n}} > \"{}\"\necho \"> [Coach] テスト出力です\"\n",
+            captured_stdin.display(),
+            captured_env.display()
+        ),
+    )
+    .unwrap();
+    let _ = Command::new("chmod")
+        .args(["+x", coach_bin.to_str().unwrap()])
+        .status();
+
+    // Configure theme = "tokyo-night" and ~ expansion via HOME or direct path
+    fs::write(
+        env.dir.join("config.toml"),
+        format!(
+            "[general]\ntheme = \"tokyo-night\"\n\n[plugins]\ndir = \"{}\"\non_reflect = [\"coach\"]\n",
+            plugins_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let reflection_body = "テストする気が起きない・・・、仕事やらんでも・・・（未確定情報しかない）。";
+    let out = env
+        .cmd()
+        .args(["reflect", reflection_body])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+
+    // 1. Verify plugin stdout was inherited to terminal
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        stdout.contains("> [Coach] テスト出力です"),
+        "Hook stdout should be inherited:\n{}",
+        stdout
+    );
+
+    // 2. Verify 1-line JSON passed via stdin
+    let stdin_json = fs::read_to_string(&captured_stdin).expect("read captured stdin JSON");
+    let lines: Vec<&str> = stdin_json.lines().collect();
+    assert_eq!(lines.len(), 1, "stdin payload must be single-line JSON");
+    let line = lines[0];
+    assert!(line.contains("\"event\":\"on_reflect\""), "json: {}", line);
+    assert!(line.contains("\"date\":\"2026-10-17\""), "json: {}", line);
+    assert!(
+        line.contains(&format!("\"added_text\":\"{}\"", reflection_body)),
+        "json: {}",
+        line
+    );
+    assert!(line.contains("2026-10-17.md"), "json: {}", line);
+
+    // 3. Verify injected YARUBE_* environment variables
+    let env_text = fs::read_to_string(&captured_env).expect("read captured env");
+    assert!(env_text.contains(&format!("VERSION={}", env!("CARGO_PKG_VERSION"))));
+    assert!(env_text.contains("LANG=ja"));
+    assert!(env_text.contains("2026-10-17.md"));
+    assert!(env_text.contains("config.toml"));
+    assert!(env_text.contains("THEME_NAME=tokyo-night"));
+    assert!(env_text.contains("COLOR_COACH=#7dcfff"));
+}
+
+/// Verifies tilde (`~/`) expansion, CWD-independence, execution ordering (save -> redraw -> hook),
+/// partial `config.toml` default fallback (`on_reflect = ["coach"]`), and `YARUBE_DEBUG=1` diagnostics.
+#[test]
+fn tp31_tilde_expansion_cwd_independence_and_debug_diagnostics() {
+    let env = TestEnv::new("2026-10-17");
+    let fake_home = env.dir.join("fake_home");
+    let default_plugins_dir = fake_home.join(".local/share/yarube/plugins");
+    fs::create_dir_all(&default_plugins_dir).unwrap();
+
+    let coach_bin = default_plugins_dir.join("yarube-coach");
+    fs::write(
+        &coach_bin,
+        "#!/bin/sh\necho \"> [Coach] チルダ展開とCWD非依存のフック出力\"\n",
+    )
+    .unwrap();
+    let _ = Command::new("chmod")
+        .args(["+x", coach_bin.to_str().unwrap()])
+        .status();
+
+    // Existing config.toml that has NO `[plugins]` or `on_reflect` specified (must default to ~/.local/share/yarube/plugins and ["coach"])
+    fs::write(env.dir.join("config.toml"), "theme = \"nord\"\n").unwrap();
+
+    // Run from a completely different working directory (`/tmp`) with `HOME` set to `fake_home` and `YARUBE_DEBUG=1`
+    let out = env
+        .cmd()
+        .current_dir(env::temp_dir())
+        .env("HOME", &fake_home)
+        .env("YARUBE_DEBUG", "1")
+        .args(["reflect", "どこから実行しても発火するテスト"])
+        .output()
+        .unwrap();
+
+    assert!(out.status.success());
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+
+    // 1. Verify debug diagnostic output on stderr
+    assert!(
+        stderr.contains("[debug] checking plugin:") && stderr.contains("yarube-coach (exists: true"),
+        "YARUBE_DEBUG=1 should output plugin check path and existence on stderr:\n{}",
+        stderr
+    );
+
+    // 2. Verify execution order: journal redraw (`#### △ ふりかえり`) appears BEFORE hook output (`> [Coach] ...`)
+    let redraw_pos = stdout
+        .find("どこから実行しても発火するテスト")
+        .expect("journal redraw must appear in stdout");
+    let coach_pos = stdout
+        .find("> [Coach] チルダ展開とCWD非依存のフック出力")
+        .expect("hook output must appear in stdout");
+    assert!(
+        redraw_pos < coach_pos,
+        "Journal redraw must happen BEFORE on_reflect hook output:\n{}",
+        stdout
+    );
+}
+
+
 

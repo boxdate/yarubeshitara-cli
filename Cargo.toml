@@ -6,7 +6,7 @@ license = "MIT"
 description = "Yarubeshitara! (やるべしたら) - Ultra-lightweight CLI Todo & Reflection notebook"
 
 [workspace]
-exclude = ["plugins/yarube-coach"]
+exclude = ["plugins/yarube-coach", "plugins/yarube-coach-ja"]
 
 [[bin]]
 name = "yarube"
