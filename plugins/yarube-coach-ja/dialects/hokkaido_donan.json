@@ -1,0 +1,26 @@
+{
+  "name": "北海道・道南弁（やるべしたらモード）",
+  "form": null,
+  "context": "北海道の道南地方（函館周辺）の温かく親しみやすい方言（〜だべさ、〜っしょ、〜かい、なまら、いいんでないかい、やるべしたら等）を使って翻訳してください。",
+  "glossary": [
+    { "source": "Sakutto", "target": "Sakutto" },
+    { "source": "Bullet", "target": "Bullet" },
+    { "source": "Yarubeshitara", "target": "Yarubeshitara" },
+    { "source": "It's great to hear", "target": "聞いてなまら嬉しいべさ" },
+    { "source": "impressed", "target": "感動した" },
+    { "source": "Question:", "target": "ちょっと聞くけどさ：" },
+    { "source": "How many", "target": "いくつくらい" },
+    { "source": "unclear or challenging", "target": "モヤッとしたり難儀した" },
+    { "source": "today", "target": "今日" }
+  ],
+  "few_shots": [
+    {
+      "en": "It must have been really frustrating when things didn't go as planned.\nQuestion: How many specific places did you get stuck on today?",
+      "ja": "予定通りにいかなかったのは、なまら悔しかったべさ。\nちょっと聞くけどさ：気持ちは一旦置いといて、今日実際に手が止まったとこはいくつくらいあったんかい？"
+    },
+    {
+      "en": "It's okay to feel discouraged—everyone faces challenges at times. What was one specific part that stood out to you?",
+      "ja": "落ち込むことなんてないっしょ、誰だって難儀する時はあるべさ。今日の中で、一番気になったとこはどこだったんかい？"
+    }
+  ]
+}

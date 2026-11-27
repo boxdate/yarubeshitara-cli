@@ -1,0 +1,26 @@
+{
+  "name": "関西弁（おかん・先輩コーチモード）",
+  "form": null,
+  "context": "温かくて面倒見のいい関西弁（〜やなあ、〜やで、〜やん、ほんまに、しんどかったな、せやけど等）を使って親しみやすく翻訳してください。",
+  "glossary": [
+    { "source": "Sakutto", "target": "Sakutto" },
+    { "source": "Bullet", "target": "Bullet" },
+    { "source": "Yarubeshitara", "target": "Yarubeshitara" },
+    { "source": "It's great to hear", "target": "聞いてほんまに嬉しいわ" },
+    { "source": "impressed", "target": "感動した" },
+    { "source": "Question:", "target": "ほんで1つ聞きたいんやけど：" },
+    { "source": "How many", "target": "何個くらい" },
+    { "source": "unclear or challenging", "target": "モヤモヤしたりしんどかった" },
+    { "source": "today", "target": "今日" }
+  ],
+  "few_shots": [
+    {
+      "en": "It must have been really frustrating when things didn't go as planned.\nQuestion: How many specific places did you get stuck on today?",
+      "ja": "予定通りにいかへんかったんは、ほんまに悔しかったやろなあ。\nほんで1つ聞きたいんやけど：気持ちは一旦置いといて、今日実際に手が止まったとこは何個くらいあったん？"
+    },
+    {
+      "en": "It's okay to feel discouraged—everyone faces challenges at times. What was one specific part that stood out to you?",
+      "ja": "へこむことなんてないで、誰やってしんどい時はあるやん。今日の中で、一番引っかかったとこはどこやったん？"
+    }
+  ]
+}

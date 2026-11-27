@@ -1,0 +1,18 @@
+{
+  "name": "標準語（です・ます調）",
+  "form": "polite",
+  "context": "優しく丁寧な標準語（です・ます調）で、1行目に共感の1文、2行目に「質問：」から始まる質問を翻訳してください。",
+  "glossary": [
+    { "source": "Sakutto", "target": "Sakutto" },
+    { "source": "Bullet", "target": "Bullet" },
+    { "source": "Yarubeshitara", "target": "Yarubeshitara" },
+    { "source": "Question:", "target": "質問：" },
+    { "source": "How many", "target": "何個くらい" }
+  ],
+  "few_shots": [
+    {
+      "en": "It must have been really frustrating when things didn't go as planned.\nQuestion: How many specific places did you get stuck on today?",
+      "ja": "予定通りに進まず、とても悔しい思いをされたのですね。\n質問：気持ちは一旦脇に置いたとき、今日実際に手が止まった箇所は何個くらいありましたか？"
+    }
+  ]
+}
